@@ -12,15 +12,18 @@ import java.util.Set;
  */
 public class InvokeHandler extends ChannelInboundHandlerAdapter {
     //得到某接口下某个实现类的名字
-    private String getImplClassName(ClassInfo classInfo) throws Exception {
+    private String getImplClassName(CallInfo callInfo) throws Exception {
+        String className = callInfo.getClassName();
+        int lastDot = className.lastIndexOf(".");
         //服务方接口和实现类所在的包路径
-        String interfacePath = "cn.itcast.rpc.provider.service";
-        int lastDot = classInfo.getClassName().lastIndexOf(".");
-        String interfaceName = classInfo.getClassName().substring(lastDot);
-        Class superClass = Class.forName(interfacePath + interfaceName);
+        String interfacePath = className.substring(0, lastDot);
+        //获取接口名
+        String interfaceName = callInfo.getClassName().substring(lastDot);
+        //组合成接口的完整路径
+        Class<?> superClass = Class.forName(interfacePath + interfaceName);
         Reflections reflections = new Reflections(interfacePath);
         //得到某接口下的所有实现类
-        Set<Class> implClassSet = reflections.getSubTypesOf(superClass);
+        Set<Class<?>> implClassSet = reflections.getSubTypesOf((Class<Object>) superClass);
         if (implClassSet.size() == 0) {
             System.out.println("未找到实现类");
             return null;
@@ -29,8 +32,9 @@ public class InvokeHandler extends ChannelInboundHandlerAdapter {
             return null;
         } else {
             //把集合转换为数组
-            Class[] classes = implClassSet.toArray(new Class[0]);
-            return classes[0].getName(); //得到实现类的名字
+            Class<?>[] classes = implClassSet.toArray(new Class[0]);
+            //得到实现类的名字
+            return classes[0].getName();
         }
     }
 
@@ -39,11 +43,11 @@ public class InvokeHandler extends ChannelInboundHandlerAdapter {
      */
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        ClassInfo classInfo = (ClassInfo) msg;
-        Object clazz = Class.forName(getImplClassName(classInfo)).newInstance();
-        Method method = clazz.getClass().getMethod(classInfo.getMethodName(), classInfo.getTypes());
+        CallInfo callInfo = (CallInfo) msg;
+        Object clazz = Class.forName(getImplClassName(callInfo)).newInstance();
+        Method method = clazz.getClass().getMethod(callInfo.getMethodName(), callInfo.getTypes());
         //通过反射调用实现类的方法
-        Object result = method.invoke(clazz, classInfo.getObjects());
+        Object result = method.invoke(clazz, callInfo.getObjects());
         ctx.writeAndFlush(result);
     }
 }

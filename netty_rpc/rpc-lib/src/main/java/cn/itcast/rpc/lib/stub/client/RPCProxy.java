@@ -1,6 +1,6 @@
 package cn.itcast.rpc.lib.stub.client;
 
-import cn.itcast.rpc.lib.stub.server.ClassInfo;
+import cn.itcast.rpc.lib.stub.server.CallInfo;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -64,11 +64,11 @@ public class RPCProxy {
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             //封装调用信息到ClassInfo
-            ClassInfo classInfo = new ClassInfo();
-            classInfo.setClassName(targetClass.getName());
-            classInfo.setMethodName(method.getName());
-            classInfo.setObjects(args);
-            classInfo.setTypes(method.getParameterTypes());
+            CallInfo callInfo = new CallInfo();
+            callInfo.setClassName(targetClass.getName());
+            callInfo.setMethodName(method.getName());
+            callInfo.setObjects(args);
+            callInfo.setTypes(method.getParameterTypes());
             //使用Netty发送数据到接口提供方
             EventLoopGroup group = new NioEventLoopGroup();
             ResultHandler resultHandler = new ResultHandler();
@@ -89,7 +89,7 @@ public class RPCProxy {
                             }
                         });
                 ChannelFuture future = bootstrap.connect(host, port).sync();
-                future.channel().writeAndFlush(classInfo).sync();
+                future.channel().writeAndFlush(callInfo).sync();
                 future.channel().closeFuture().sync();
             } finally {
                 group.shutdownGracefully();

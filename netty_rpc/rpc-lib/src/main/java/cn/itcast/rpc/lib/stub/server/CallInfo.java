@@ -6,7 +6,7 @@ import java.util.Arrays;
 /**
  * 封装远程调用方法的方法名、参数、返回值等信息的实体
  */
-public class ClassInfo implements Serializable {
+public class CallInfo implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
