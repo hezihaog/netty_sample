@@ -49,11 +49,11 @@ public class RPCProxy {
         /**
          * 远程服务的地址
          */
-        private String host;
+        private final String host;
         /**
          * 远程服务的端口号
          */
-        private int port;
+        private final int port;
 
         public RemoteMethodCall(Class<?> targetClass, String host, int port) {
             this.targetClass = targetClass;

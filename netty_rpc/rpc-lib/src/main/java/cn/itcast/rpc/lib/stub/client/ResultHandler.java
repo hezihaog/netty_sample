@@ -4,7 +4,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
 /**
- * 调用方的远程回调处理类
+ * 远程方法的回调结果处理类
  */
 public class ResultHandler extends ChannelInboundHandlerAdapter {
     /**
